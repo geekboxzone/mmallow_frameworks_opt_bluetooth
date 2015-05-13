@@ -453,13 +453,9 @@ public class BluetoothMasClient {
     }
 
     private void sendToClient(int event, boolean success, Object param) {
-        if (success) {
-            mCallback.obtainMessage(event, STATUS_OK, mMas.getMasInstanceId(), param)
-                    .sendToTarget();
-        } else {
-            mCallback.obtainMessage(event, STATUS_FAILED, mMas.getMasInstanceId(), null)
-                    .sendToTarget();
-        }
+        // Send  event, status and notification state for both sucess and failure case.
+        mCallback.obtainMessage(event, success ? STATUS_OK : STATUS_FAILED, mMas.getMasInstanceId(),
+            param).sendToTarget();
     }
 
     private class SocketConnectThread extends Thread {
@@ -547,8 +543,11 @@ public class BluetoothMasClient {
         }
 
         public void setPeriod(Date filterBegin, Date filterEnd) {
-            periodBegin = (new ObexTime(filterBegin)).toString();
-            periodEnd = (new ObexTime(filterEnd)).toString();
+        //Handle possible NPE for obexTime constructor utility
+            if(filterBegin != null )
+                periodBegin = (new ObexTime(filterBegin)).toString();
+            if(filterEnd != null)
+                periodEnd = (new ObexTime(filterEnd)).toString();
         }
 
         public void setReadStatus(byte readfilter) {
